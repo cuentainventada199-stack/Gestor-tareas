@@ -8,22 +8,38 @@ def obtener_tareas():
     return [Tarea.desde_diccionario(d) for d in session.get('tareas', [])]
 
 def guardar_tareas(tareas):
-    # Flask serializa diccionarios en una cookie de sesión firmada.
     session['tareas'] = [t.a_diccionario() for t in tareas]
 
 @app.route('/')
 def inicio():
-    return render_template('index.html', tareas=session.get('tareas', []))
+    tareas = session.get('tareas', [])
+    return render_template('index.html', tareas=tareas, completadas=sum(t['completada'] for t in tareas))
 
 @app.route('/crear', methods=['POST'])
 def crear():
     tareas = obtener_tareas()
     siguiente_id = session.get('siguiente_id', 1)
-    tarea = Tarea(siguiente_id, request.form.get('titulo', ''))
-    tareas.append(tarea)
+    tareas.append(Tarea(siguiente_id, request.form.get('titulo', '')))
     guardar_tareas(tareas)
     session['siguiente_id'] = siguiente_id + 1
     flash('Tarea añadida.', 'exito')
+    return redirect(url_for('inicio'))
+
+@app.route('/alternar/<int:identificador>', methods=['POST'])
+def alternar(identificador):
+    tareas = obtener_tareas()
+    for tarea in tareas:
+        if tarea.get_id() == identificador:
+            tarea.set_completada(not tarea.get_completada())
+            guardar_tareas(tareas)
+            break
+    return redirect(url_for('inicio'))
+
+@app.route('/eliminar/<int:identificador>', methods=['POST'])
+def eliminar(identificador):
+    tareas = [t for t in obtener_tareas() if t.get_id() != identificador]
+    guardar_tareas(tareas)
+    flash('Tarea eliminada.', 'exito')
     return redirect(url_for('inicio'))
 
 if __name__ == '__main__':
