@@ -11,7 +11,13 @@
       <header>
         <h1>Editar tarea</h1>
       </header>
-      
+
+      {% with mensajes = get_flashed_messages(with_categories=true) %}
+        {% for categoria, mensaje in mensajes %}
+          <div class="mensaje {{ categoria }}">{{ mensaje }}</div>
+        {% endfor %}
+      {% endwith %}
+
       <section class="panel">
         <form method="post">
           <label for="titulo">Nuevo título</label>
