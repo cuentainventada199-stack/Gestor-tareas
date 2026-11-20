@@ -4,9 +4,36 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>TaskMaster</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   </head>
   <body>
-    <h1>TaskMaster</h1>
-    <p>Mis tareas</p>
+    <main class="contenedor">
+      <header>
+        <h1>✓ TaskMaster</h1>
+        <p>Organiza tu día de forma sencilla</p>
+      </header>
+      
+      <section class="panel">
+        <h2>Nueva tarea</h2>
+        <form action="/crear" method="post">
+          <label for="titulo">Título</label>
+          <div class="formulario">
+            <input id="titulo" name="titulo" maxlength="100" placeholder="Ej.: Estudiar Flask" required>
+            <button type="submit">Añadir</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel">
+        <h2>Mis tareas</h2>
+        <ul>
+          {% for tarea in tareas %}
+            <li>{{ tarea.titulo }}</li>
+          {% else %}
+            <li>Aún no hay tareas.</li>
+          {% endfor %}
+        </ul>
+      </section>
+    </main>
   </body>
 </html>
