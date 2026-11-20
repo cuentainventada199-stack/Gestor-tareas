@@ -2,7 +2,8 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from tarea import Tarea
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'cambiar-esta-clave-antes-de-publicar'
+import os
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'clave-local-solo-desarrollo')
 
 def obtener_tareas():
     return [Tarea.desde_diccionario(d) for d in session.get('tareas', [])]
@@ -17,9 +18,15 @@ def inicio():
 
 @app.route('/crear', methods=['POST'])
 def crear():
+    try:
+        titulo = request.form.get('titulo', '')
+        tarea_nueva = Tarea(session.get('siguiente_id', 1), titulo)
+    except (ValueError, TypeError) as error:
+        flash(str(error), 'error')
+        return redirect(url_for('inicio'))
     tareas = obtener_tareas()
     siguiente_id = session.get('siguiente_id', 1)
-    tareas.append(Tarea(siguiente_id, request.form.get('titulo', '')))
+    tareas.append(tarea_nueva)
     guardar_tareas(tareas)
     session['siguiente_id'] = siguiente_id + 1
     flash('Tarea añadida.', 'exito')
@@ -50,7 +57,11 @@ def editar(identificador):
         flash('No existe esa tarea.', 'error')
         return redirect(url_for('inicio'))
     if request.method == 'POST':
-        tarea.set_titulo(request.form.get('titulo', ''))
+        try:
+            tarea.set_titulo(request.form.get('titulo', ''))
+        except (ValueError, TypeError) as error:
+            flash(str(error), 'error')
+            return render_template('editar.html', tarea=tarea.a_diccionario()), 400
         guardar_tareas(tareas)
         flash('Tarea actualizada.', 'exito')
         return redirect(url_for('inicio'))
