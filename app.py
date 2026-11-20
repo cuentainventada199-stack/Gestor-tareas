@@ -42,5 +42,19 @@ def eliminar(identificador):
     flash('Tarea eliminada.', 'exito')
     return redirect(url_for('inicio'))
 
+@app.route('/editar/<int:identificador>', methods=['GET', 'POST'])
+def editar(identificador):
+    tareas = obtener_tareas()
+    tarea = next((t for t in tareas if t.get_id() == identificador), None)
+    if tarea is None:
+        flash('No existe esa tarea.', 'error')
+        return redirect(url_for('inicio'))
+    if request.method == 'POST':
+        tarea.set_titulo(request.form.get('titulo', ''))
+        guardar_tareas(tareas)
+        flash('Tarea actualizada.', 'exito')
+        return redirect(url_for('inicio'))
+    return render_template('editar.html', tarea=tarea.a_diccionario())
+
 if __name__ == '__main__':
     app.run(debug=True)
