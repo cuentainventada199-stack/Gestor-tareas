@@ -12,23 +12,44 @@
         <h1>✓ TaskMaster</h1>
         <p>Organiza tu día de forma sencilla</p>
       </header>
-      
+
+      {% with mensajes = get_flashed_messages(with_categories=true) %}
+        {% for categoria, mensaje in mensajes %}
+          <div class="mensaje {{ categoria }}">{{ mensaje }}</div>
+        {% endfor %}
+      {% endwith %}
+
       <section class="panel">
         <h2>Nueva tarea</h2>
-        <form action="/crear" method="post">
+        <form action="{{ url_for('crear') }}" method="post">
           <label for="titulo">Título</label>
           <div class="formulario">
             <input id="titulo" name="titulo" maxlength="100" placeholder="Ej.: Estudiar Flask" required>
-            <button type="submit">Añadir</button>
+            <button>Añadir</button>
           </div>
         </form>
       </section>
 
       <section class="panel">
         <h2>Mis tareas</h2>
+        <p class="resumen">{{ completadas }} de {{ tareas|length }} completadas</p>
         <ul>
           {% for tarea in tareas %}
-            <li>{{ tarea.titulo }}</li>
+            <li class="tarea">
+              <span class="nombre {% if tarea.completada %}completada{% endif %}">
+                {{ tarea.titulo }}
+              </span>
+              <div class="acciones">
+                <form action="{{ url_for('alternar', identificador=tarea.id) }}" method="post">
+                  <button class="secundario">
+                    {% if tarea.completada %}Pendiente{% else %}Completar{% endif %}
+                  </button>
+                </form>
+                <form action="{{ url_for('eliminar', identificador=tarea.id) }}" method="post">
+                  <button class="peligro">Eliminar</button>
+                </form>
+              </div>
+            </li>
           {% else %}
             <li>Aún no hay tareas.</li>
           {% endfor %}
