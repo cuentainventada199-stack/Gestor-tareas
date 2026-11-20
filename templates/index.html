@@ -45,6 +45,7 @@
                     {% if tarea.completada %}Pendiente{% else %}Completar{% endif %}
                   </button>
                 </form>
+                <a class="boton secundario" href="{{ url_for('editar', identificador=tarea.id) }}">Editar</a>
                 <form action="{{ url_for('eliminar', identificador=tarea.id) }}" method="post">
                   <button class="peligro">Eliminar</button>
                 </form>
