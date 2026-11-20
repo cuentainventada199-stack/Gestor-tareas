@@ -35,18 +35,26 @@ def crear():
 @app.route('/alternar/<int:identificador>', methods=['POST'])
 def alternar(identificador):
     tareas = obtener_tareas()
+    encontrado = False
     for tarea in tareas:
         if tarea.get_id() == identificador:
+            encontrado = True
             tarea.set_completada(not tarea.get_completada())
             guardar_tareas(tareas)
             break
+    if not encontrado:
+        flash('No existe esa tarea.', 'error')
     return redirect(url_for('inicio'))
 
 @app.route('/eliminar/<int:identificador>', methods=['POST'])
 def eliminar(identificador):
-    tareas = [t for t in obtener_tareas() if t.get_id() != identificador]
-    guardar_tareas(tareas)
-    flash('Tarea eliminada.', 'exito')
+    anteriores = obtener_tareas()
+    tareas = [t for t in anteriores if t.get_id() != identificador]
+    if len(tareas) == len(anteriores):
+        flash('No existe esa tarea.', 'error')
+    else:
+        guardar_tareas(tareas)
+        flash('Tarea eliminada.', 'exito')
     return redirect(url_for('inicio'))
 
 @app.route('/editar/<int:identificador>', methods=['GET', 'POST'])
